@@ -1,9 +1,9 @@
 package io.ehay.boot.springboot.controller;
 
-import io.ehay.boot.springboot.model.UserVO;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import io.ehay.boot.springboot.model.User;
+import io.ehay.boot.springboot.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Created by ehay@naver.com on 2018-09-21
@@ -17,12 +17,44 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
+@RequestMapping(value = "/users")
 public class UserController {
 
-    @PostMapping("/score")
-    public UserVO getUserScore(@RequestBody UserVO user){
-        System.out.println(user.getId());
-        System.out.println(user.getScore());
-        return user;
+    @Autowired
+    private UserRepository userRepository;
+
+    // create
+    @PutMapping
+    public User put(@RequestParam(value = "name") String name,
+                    @RequestParam(value = "score") int score){
+        return userRepository.save(new User(name, score));
     }
+
+    // read all
+    @GetMapping(value = "list")
+    public Iterable<User> findAll(){
+        return userRepository.findAll();
+    }
+
+    // read one
+    @GetMapping(value = "{id}")
+    public User findOne(@PathVariable(value = "id") Long id){
+        return userRepository.findById(id).orElse(null);
+    }
+
+    // update
+    @PostMapping(value = "{id}")
+    public User update(@PathVariable(value = "id") Long id,
+                        @PathVariable(value = "name") String name){
+        User user = userRepository.findById(id).orElse(null);
+        user.setName(name);
+        return userRepository.save(user);
+    }
+
+    // delete
+    @DeleteMapping
+    public void delete(@RequestParam(value = "id") Long id){
+        userRepository.deleteById(id);
+    }
+
 }
